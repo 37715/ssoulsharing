@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
+  <circle cx="32" cy="32" r="30" fill="#F4F2EC" stroke="#0A0908" stroke-width="1.5"/>
+  <g transform="translate(32 32) skewX(-10) translate(-32 -32)">
+    <text x="32" y="45" fill="#0A0908"
+          font-family="Didot, 'Bodoni MT', 'Hoefler Text', Garamond, 'Times New Roman', serif"
+          font-style="italic" font-weight="400" font-size="40"
+          text-anchor="middle">s</text>
+  </g>
+</svg>

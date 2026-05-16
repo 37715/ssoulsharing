@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ssoulsharing</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="pdp-page">
+
+<header class="mast">
+  <a class="brand" href="index.html">ssoulsharing</a>
+  <nav class="util">
+    <span class="lang">
+      <a href="#" class="on">en</a>
+      <a href="#">eu</a>
+      <a href="#">fr</a>
+    </span>
+    <a class="cart" href="#" id="cart-link">Cart 0</a>
+  </nav>
+</header>
+
+<main class="pdp" id="app"></main>
+
+<footer>
+  <div class="l"><span>ssoulsharing</span><span>Catalogue</span><span>©</span></div>
+  <div class="r"><a href="#">Privacy</a><a href="#">Terms</a></div>
+</footer>
+
+<script src="catalog.js"></script>
+<script>
+/* Catalogue (catalog.js) + basket (cart.js) are shared. */
+const id = new URLSearchParams(location.search).get("p");
+const P = CATALOG[id];
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+if (!P) {
+  app.innerHTML =
+    '<div class="pdp-missing"><p>no such product.</p>' +
+    '<p><a href="index.html">return to catalogue</a></p></div>';
+} else {
+  // only show the thumbnail strip when there's more than one image
+  const thumbs = P.images.length < 2 ? "" :
+    '<div class="pdp-thumbs" id="thumbs">' +
+    P.images.map((src, i) =>
+      '<button data-i="' + i + '" aria-current="' + (i === 0) + '">' +
+        '<img src="' + esc(src) + '" alt="' + esc(P.alt) + '" ' +
+        'onerror="this.closest(\'button\').remove()" /></button>'
+    ).join("") + '</div>';
+
+  const specRows = Object.entries(P.spec).map(([k, v]) =>
+    '<div class="row"><span class="k">' + esc(k) + '</span>' +
+    '<span class="v">' + esc(v) + '</span></div>'
+  ).join("");
+
+  const sizeBtns = SIZES.map((s, i) =>
+    '<button data-s="' + esc(s) + '" aria-pressed="' + (i === 2) + '">' +
+    esc(s) + '</button>'
+  ).join("");
+
+  app.innerHTML =
+    '<div class="pdp-head">' +
+      '<div class="lock">' +
+        '<span class="ref">' + esc(P.type) +
+          ' / no. ' + esc(P.no) + ' / ' + esc(P.price) + '</span>' +
+        '<div class="big">' + esc(P.type) + '</div>' +
+      '</div>' +
+      '<span class="idx">' + esc(P.no) + '</span>' +
+      '<a class="pdp-back" href="index.html">← index</a>' +
+    '</div>' +
+
+    '<div class="pdp-body">' +
+      '<div class="pdp-gallery">' +
+        '<div class="pdp-stage">' +
+          '<img id="stage-img" decoding="async" src="' + esc(P.images[0]) +
+            '" alt="' + esc(P.alt) + '" />' +
+        '</div>' +
+        thumbs +
+      '</div>' +
+
+      '<div class="pdp-info">' +
+        '<div class="p-name">' + esc(P.name) + '</div>' +
+        '<div class="p-price">' + esc(P.price) + '</div>' +
+        '<div class="pdp-desc">' + esc(P.desc) + '</div>' +
+        '<div class="pdp-spec">' + specRows + '</div>' +
+        '<div class="pdp-sizes">' +
+          '<span class="lbl">size</span>' +
+          '<div class="opts" id="sizes">' + sizeBtns + '</div>' +
+        '</div>' +
+        '<button class="pdp-add" id="add">' +
+          '<span>add to cart</span><span class="arw">▸</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+
+  const stage = document.getElementById("stage-img");
+  const thumbsEl = document.getElementById("thumbs");
+  if (thumbsEl) thumbsEl.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    stage.src = P.images[+b.dataset.i];
+    thumbsEl.querySelectorAll("button").forEach(x =>
+      x.setAttribute("aria-current", x === b));
+  });
+
+  document.getElementById("sizes").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    document.querySelectorAll("#sizes button").forEach(x =>
+      x.setAttribute("aria-pressed", x === b));
+  });
+
+  document.getElementById("add").addEventListener("click", () => {
+    const sel = document.querySelector('#sizes button[aria-pressed="true"]');
+    window.Cart.add(id, sel ? sel.dataset.s : "m");
+    window.Cart.open();
+  });
+}
+</script>
+<script src="cart.js"></script>
+</body>
+</html>
