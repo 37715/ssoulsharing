@@ -15,6 +15,39 @@
     return parseFloat(String(p).replace(/[^0-9.]/g, "")) || 0;
   };
 
+  /* ── boot screen: wordmark pulsing, shown once per session ── */
+  (function initBoot() {
+    var boot = document.getElementById("boot");
+    if (!boot) return;
+    var seen;
+    try { seen = sessionStorage.getItem("ss_booted"); } catch (e) { seen = null; }
+    var kill = function () {
+      if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
+      boot = null;
+    };
+    if (seen) { kill(); return; }                 // already booted this visit
+    try { sessionStorage.setItem("ss_booted", "1"); } catch (e) {}
+    var WORD = "ssoulsharing";
+    boot.innerHTML =
+      '<div class="boot-mark">' +
+      WORD.split("").map(function (ch, i) {
+        return '<span style="--i:' + i + '">' + ch + '</span>';
+      }).join("") +
+      '</div>';
+    var MIN = 1700, t0 = Date.now();
+    var done = function () {
+      if (!boot) return;
+      boot.classList.add("is-done");
+      setTimeout(kill, 450);
+    };
+    var finish = function () {
+      setTimeout(done, Math.max(0, MIN - (Date.now() - t0)));
+    };
+    if (document.readyState === "complete") finish();
+    else window.addEventListener("load", finish);
+    setTimeout(done, 3800);                        // safety: never stuck
+  })();
+
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
     catch (e) { return {}; }
